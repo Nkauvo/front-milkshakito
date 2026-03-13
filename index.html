@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MilkShakito - Menu & Delivery</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,300;0,400;0,600;0,700;1,400&display=swap">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        principal: '#fdabac',
+                        cinza: '#666666',
+                        'fundo-footer': '#bad0ff',
+                    },
+                    fontFamily: { barlow: ['Barlow', 'sans-serif'] },
+                    keyframes: {
+                        flutuar: {
+                            '0%, 100%': { transform: 'translateY(0px)' },
+                            '50%': { transform: 'translateY(-40px)' },
+                        }
+                    },
+                    animation: { flutuar: 'flutuar 4s ease-in-out infinite' }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Slogan Hover */
+        .slogan-header { opacity: 0; transform: translateX(-20px); max-width: 0; overflow: hidden; transition: all 0.5s ease-in-out; white-space: nowrap; }
+        .logo-wrapper:hover .slogan-header { opacity: 1; transform: translateX(0); max-width: 650px; }
+
+        /* --- ESTILO DO BOTÃO HAMBURGUER (X CORRIGIDO) --- */
+        .hamburger {
+            width: 30px;
+            height: 24px;
+            position: relative;
+            cursor: pointer;
+            z-index: 100;
+        }
+        .hamburger span {
+            display: block;
+            width: 100%;
+            height: 3px;
+            background-color: #333;
+            border-radius: 3px;
+            position: absolute;
+            transition: all 0.4s ease-in-out;
+            transform-origin: center;
+        }
+        /* Posições das barras */
+        .hamburger span:nth-child(1) { top: 0; }
+        .hamburger span:nth-child(2) { top: 10px; }
+        .hamburger span:nth-child(3) { top: 20px; }
+
+        /* Animação para o X */
+        .hamburger.active span:nth-child(1) { top: 10px; transform: rotate(45deg); }
+        .hamburger.active span:nth-child(2) { opacity: 0; transform: translateX(-20px); }
+        .hamburger.active span:nth-child(3) { top: 10px; transform: rotate(-45deg); }
+
+        /* Sidebar Mobile */
+        @media (max-width: 1023px) {
+            .nav-menu {
+                position: fixed;
+                right: -100%;
+                top: 0;
+                width: 75%;
+                height: 100vh;
+                background-color: white;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                gap: 2rem;
+                transition: 0.4s ease;
+                z-index: 50;
+                box-shadow: -10px 0 30px rgba(0,0,0,0.1);
+            }
+            .nav-menu.active { right: 0; }
+            #overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 40; }
+            #overlay.active { display: block; }
+            
+            /* Container de Swipe */
+            #swipe-outer-container { overflow: hidden; width: 100%; }
+            #swipe-container { display: flex; transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1); }
+            .category-panel { flex: 0 0 100%; min-width: 100%; padding: 0 20px; box-sizing: border-box; }
+        }
+
+        .menu-item { transition: background-color 0.2s; -webkit-tap-highlight-color: transparent; }
+    </style>
+</head>
+<body class="font-barlow text-[#222222] bg-white overflow-x-hidden">
+
+    <div id="overlay"></div>
+
+    <div id="cart-btn" class="fixed bottom-6 left-6 z-[100] bg-principal text-white p-4 rounded-full shadow-2xl cursor-pointer flex items-center gap-2 transition-transform hover:scale-110 hidden">
+        <i class="fa-solid fa-cart-shopping text-xl"></i>
+        <span id="cart-count" class="font-bold text-lg">0</span>
+    </div>
+
+    <a href="https://wa.me/5515987654321" target="_blank" class="fixed right-4 bottom-4 z-[100] hover:scale-110 transition-transform">
+        <img src="./assets/images/whatsapp.png" alt="WhatsApp" class="h-14 w-auto drop-shadow-lg">
+    </a>
+
+    <header class="sticky top-0 z-[60] bg-white px-4 py-4 lg:px-8 lg:shadow-sm">
+        <div class="lg:max-w-[1200px] lg:mx-auto flex justify-between items-center">
+            <div class="logo-wrapper flex items-center gap-4 cursor-default">
+                <img src="./assets/images/logoshake.png" alt="Logo" class="w-32 lg:w-[140px]">
+                <span class="slogan-header hidden lg:block font-semibold text-principal text-sm italic">Cremosidade em cada detalhe.</span>
+            </div>
+
+            <button class="hamburger lg:hidden" id="hamburger-btn">
+                <span></span><span></span><span></span>
+            </button>
+
+            <nav class="nav-menu lg:block">
+                <ul class="flex flex-col lg:flex-row list-none font-bold text-center gap-6 lg:gap-0">
+                    <li><a href="#cardapio" class="nav-link block text-xl lg:text-base hover:text-principal lg:ml-8">CARDÁPIO</a></li>
+                    <li><button id="cart-menu-link" class="nav-link block w-full text-xl lg:text-base hover:text-principal lg:ml-8 uppercase">CARRINHO</button></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <section class="flex flex-col items-center text-center px-4 py-12 lg:flex-row lg:justify-between lg:max-w-[1200px] lg:mx-auto lg:py-20">
+            <div class="lg:w-1/2 lg:text-left">
+                <h1 class="text-4xl lg:text-6xl font-bold leading-tight mb-6">O Shake que você <span class="text-principal italic">sempre sonhou.</span></h1>
+                <p class="text-xl text-cinza mb-8">Artesanal, cremoso e irresistível.</p>
+                <a href="#cardapio" class="border-2 border-[#333] rounded-xl py-3 px-10 font-bold uppercase hover:bg-[#333] hover:text-white transition-all shadow-lg inline-block">Ver Cardápio</a>
+            </div>
+            <div class="lg:w-1/2 flex justify-center mt-12 lg:mt-0">
+                <img src="./assets/images/shakes.png" alt="Milkshake" class="w-full max-w-[320px] lg:max-w-[550px] animate-flutuar">
+            </div>
+        </section>
+
+        <section id="cardapio" class="px-4 py-10 lg:max-w-[1100px] lg:mx-auto">
+            <h2 class="text-center text-3xl font-bold mb-10">Nosso Menu</h2>
+            
+            <div id="swipe-outer-container">
+                <div id="swipe-container" class="lg:grid lg:grid-cols-2 lg:gap-12">
+                    <div class="category-panel">
+                        <h3 class="text-principal text-xl font-bold border-b-2 border-gray-100 pb-2 mb-4">Clássicos</h3>
+                        <div class="menu-item flex justify-between items-center py-5 border-b border-dashed cursor-pointer" data-nome="Chocolate Belga" data-preco="18.00">
+                            <div><p class="font-bold">Chocolate Belga</p><p class="text-sm text-cinza">Sorvete premium e calda artesanal</p></div>
+                            <div class="text-principal font-bold text-lg">R$ 18,00</div>
+                        </div>
+                        <div class="menu-item flex justify-between items-center py-5 border-b border-dashed cursor-pointer" data-nome="Morango Silvestre" data-preco="18.00">
+                            <div><p class="font-bold">Morango Silvestre</p><p class="text-sm text-cinza">Frutas frescas batidas na hora</p></div>
+                            <div class="text-principal font-bold text-lg">R$ 18,00</div>
+                        </div>
+                    </div>
+                    <div class="category-panel mt-8 lg:mt-0">
+                        <h3 class="text-principal text-xl font-bold border-b-2 border-gray-100 pb-2 mb-4">Especiais</h3>
+                        <div class="menu-item flex justify-between items-center py-5 border-b border-dashed cursor-pointer" data-nome="Ninho com Nutella" data-preco="24.00">
+                            <div><p class="font-bold">Ninho com Nutella</p><p class="text-sm text-cinza">O queridinho da galera</p></div>
+                            <div class="text-principal font-bold text-lg">R$ 24,00</div>
+                        </div>
+                        <div class="menu-item flex justify-between items-center py-5 border-b border-dashed cursor-pointer" data-nome="Cookies 'n Cream" data-preco="20.00">
+                            <div><p class="font-bold">Cookies 'n Cream</p><p class="text-sm text-cinza">Crocante e muito cremoso</p></div>
+                            <div class="text-principal font-bold text-lg">R$ 20,00</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex justify-center gap-3 mt-8 lg:hidden">
+                <div id="dot-0" class="w-2.5 h-2.5 rounded-full bg-principal transition-colors"></div>
+                <div id="dot-1" class="w-2.5 h-2.5 rounded-full bg-gray-300 transition-colors"></div>
+            </div>
+        </section>
+    </main>
+
+    <div id="cart-modal" class="fixed inset-0 bg-black/50 z-[150] hidden items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-3xl w-full max-w-lg p-6 shadow-2xl relative">
+            <h2 class="text-2xl font-bold mb-6 flex items-center gap-2 text-gray-800">
+                <i class="fa-solid fa-cart-shopping text-principal"></i> Seu Pedido
+            </h2>
+            
+            <div id="cart-items" class="max-h-[350px] overflow-y-auto mb-6 space-y-4 pr-2">
+                </div>
+            
+            <div class="border-t border-gray-100 pt-5 mb-6 flex justify-between font-bold text-xl">
+                <span class="text-gray-600">Total:</span>
+                <span id="cart-total-value" class="text-principal">R$ 0,00</span>
+            </div>
+
+            <div class="space-y-4 mb-6">
+                <input type="text" id="user-name" placeholder="Informe seu nome" class="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl outline-none focus:border-principal transition-all">
+            </div>
+
+            <div class="flex gap-4">
+                <button id="close-cart" class="flex-1 py-4 bg-gray-100 text-gray-600 rounded-2xl font-bold hover:bg-gray-200 transition-all">Voltar</button>
+                <button id="checkout-btn" class="flex-[2] py-4 bg-principal text-white rounded-2xl font-bold shadow-lg hover:brightness-105 transition-all">Concluir Pedido</button>
+            </div>
+        </div>
+    </div>
+
+    <footer class="bg-fundo-footer text-center py-12 mt-20">
+        <h3 class="font-bold text-white text-2xl mb-2">MilkShakito</h3>
+        <p class="text-[#333] text-sm">&copy; 2026 - O melhor milkshake de Sorocaba.</p>
+    </footer>
+
+    <script>
+        // --- MENU E X ---
+        const btn = document.getElementById('hamburger-btn');
+        const nav = document.querySelector('.nav-menu');
+        const overlay = document.getElementById('overlay');
+        const links = document.querySelectorAll('.nav-link');
+
+        const toggleMenu = () => {
+            btn.classList.toggle('active');
+            nav.classList.toggle('active');
+            overlay.classList.toggle('active');
+            document.body.style.overflow = nav.classList.contains('active') ? 'hidden' : 'auto';
+        };
+
+        btn.addEventListener('click', toggleMenu);
+        overlay.addEventListener('click', toggleMenu);
+        links.forEach(l => l.addEventListener('click', toggleMenu));
+
+        // --- LÓGICA DO CARRINHO ---
+        let carrinho = JSON.parse(localStorage.getItem('milk_cart')) || [];
+        const cartModal = document.getElementById('cart-modal');
+        const cartItemsDiv = document.getElementById('cart-items');
+        const cartTotalValue = document.getElementById('cart-total-value');
+        const cartCount = document.getElementById('cart-count');
+        const cartBtn = document.getElementById('cart-btn');
+
+        function atualizarCarrinhoUI() {
+            cartItemsDiv.innerHTML = '';
+            let total = 0, totalItens = 0;
+
+            if (carrinho.length === 0) {
+                cartItemsDiv.innerHTML = '<p class="text-center text-gray-400 py-10">Carrinho vazio...</p>';
+            }
+
+            carrinho.forEach((item, index) => {
+                total += item.preco * item.qtd;
+                totalItens += item.qtd;
+                cartItemsDiv.innerHTML += `
+                    <div class="flex justify-between items-center bg-gray-50 p-4 rounded-2xl">
+                        <div class="flex-1">
+                            <p class="font-bold text-gray-800">${item.nome}</p>
+                            <div class="flex items-center gap-3 mt-1">
+                                <button onclick="alterarQtd(${index}, -1)" class="w-7 h-7 flex items-center justify-center bg-white border rounded-lg shadow-sm hover:bg-gray-50">-</button>
+                                <span class="font-bold text-sm">${item.qtd}</span>
+                                <button onclick="alterarQtd(${index}, 1)" class="w-7 h-7 flex items-center justify-center bg-white border rounded-lg shadow-sm hover:bg-gray-50">+</button>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-5">
+                            <span class="font-bold text-principal">R$ ${(item.preco * item.qtd).toFixed(2)}</span>
+                            <button onclick="removerItem(${index})" class="text-red-400 hover:text-red-600 transition-colors">
+                                <i class="fa-solid fa-trash-can text-lg"></i>
+                            </button>
+                        </div>
+                    </div>`;
+            });
+
+            cartTotalValue.innerText = `R$ ${total.toFixed(2)}`;
+            cartCount.innerText = totalItens;
+            cartBtn.classList.toggle('hidden', totalItens === 0);
+            localStorage.setItem('milk_cart', JSON.stringify(carrinho));
+        }
+
+        window.alterarQtd = (index, delta) => {
+            carrinho[index].qtd += delta;
+            if (carrinho[index].qtd <= 0) removerItem(index);
+            else atualizarCarrinhoUI();
+        };
+
+        window.removerItem = (index) => {
+            carrinho.splice(index, 1);
+            atualizarCarrinhoUI();
+        };
+
+        document.querySelectorAll('.menu-item').forEach(item => {
+            item.addEventListener('click', () => {
+                const nome = item.dataset.nome;
+                const preco = parseFloat(item.dataset.preco);
+                const ex = carrinho.find(i => i.nome === nome);
+                if (ex) ex.qtd++; else carrinho.push({ nome, preco, qtd: 1 });
+                atualizarCarrinhoUI();
+                
+                item.style.backgroundColor = '#fff0f1';
+                setTimeout(() => item.style.backgroundColor = 'transparent', 200);
+            });
+        });
+
+        cartBtn.addEventListener('click', () => cartModal.classList.remove('hidden'));
+        document.getElementById('cart-menu-link').addEventListener('click', () => { cartModal.classList.remove('hidden'); toggleMenu(); });
+        document.getElementById('close-cart').addEventListener('click', () => cartModal.classList.add('hidden'));
+
+        // --- GPS E FINALIZAÇÃO ---
+        const checkoutBtn = document.getElementById('checkout-btn');
+        checkoutBtn.addEventListener('click', () => {
+            const nome = document.getElementById('user-name').value;
+            if (!nome) return alert("Informe seu nome para continuar!");
+            if (carrinho.length === 0) return alert("Seu carrinho está vazio!");
+
+            const originalText = checkoutBtn.innerText;
+            checkoutBtn.disabled = true;
+            checkoutBtn.innerText = "Buscando GPS...";
+
+            if ("geolocation" in navigator) {
+                navigator.geolocation.getCurrentPosition(
+                    (pos) => {
+                        const lat = pos.coords.latitude;
+                        const lon = pos.coords.longitude;
+                        checkoutBtn.disabled = false;
+                        checkoutBtn.innerText = originalText;
+
+                        alert(`✅ PEDIDO CONCLUÍDO!\n\nCliente: ${nome}\nLocalização: ${lat.toFixed(5)}, ${lon.toFixed(5)}\n\nObrigado por pedir no MilkShakito! Seu carrinho foi limpo.`);
+                        
+                        carrinho = [];
+                        atualizarCarrinhoUI();
+                        cartModal.classList.add('hidden');
+                        document.getElementById('user-name').value = '';
+                    },
+                    (err) => {
+                        checkoutBtn.disabled = false;
+                        checkoutBtn.innerText = originalText;
+                        alert(`Pedido confirmado, ${nome}! (GPS não disponível, mas anotamos seu pedido)`);
+                        carrinho = [];
+                        atualizarCarrinhoUI();
+                        cartModal.classList.add('hidden');
+                    },
+                    { enableHighAccuracy: true, timeout: 5000 }
+                );
+            } else {
+                alert(`Pedido finalizado, ${nome}!`);
+                carrinho = [];
+                atualizarCarrinhoUI();
+                cartModal.classList.add('hidden');
+            }
+        });
+
+        // --- SWIPE MOBILE ---
+        const container = document.getElementById('swipe-container');
+        const dots = [document.getElementById('dot-0'), document.getElementById('dot-1')];
+        let startX = 0, currentIndex = 0;
+
+        container.addEventListener('touchstart', e => startX = e.touches[0].clientX, {passive: true});
+        container.addEventListener('touchend', e => {
+            if (window.innerWidth >= 1024) return;
+            const diff = e.changedTouches[0].clientX - startX;
+            if (Math.abs(diff) > 60) {
+                currentIndex = diff < 0 ? 1 : 0;
+                container.style.transform = `translateX(-${currentIndex * 100}%)`;
+                dots.forEach((d, i) => d.style.backgroundColor = i === currentIndex ? '#fdabac' : '#d1d5db');
+            }
+        });
+
+        atualizarCarrinhoUI();
+    </script>
+</body>
+</html>
