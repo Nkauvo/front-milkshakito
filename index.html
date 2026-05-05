@@ -29,6 +29,21 @@
             }
         }
     </script>
+
+    <!-- config pwa -->
+     <link rel="stylesheet" href="manifest.json">
+     <meta name="theme-color" content="#ca3c3f">
+     <meta name="apple-mobile-web-app-capable" content="yes">
+     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+     <link rel="apple-touch-icon" href="assets/images/logopwa.png">
+     <link rel="icon" type="image/png" sizes="32x32" href="assets/images/logopwa.png">
+     <link rel="stylesheet" type="image/png" sizes="16x16" href="assets/images/logopwa.png">
+     <link rel="stylesheet" type="image/png" href="assets/images/logopwa.png">
+     <link rel="shortcut icon" href="assets/images/logopwa.png" type="image/x-icon">
+     <meta name="msappaplication-TileImage" content="assets/images/logopwa.png">
+     <meta property="og:image" content="assets/images/logopwa.png">
+     <!-- termino -->
+
     <style>
         /* Slogan aparece com animação ao passar o mouse na logo */
         .slogan-header { opacity: 0; transform: translateX(-20px); max-width: 0; overflow: hidden; transition: all 0.5s ease-in-out; white-space: nowrap; }
@@ -722,6 +737,15 @@
 
         inicializarCarrinho();
         carregarCardapio();
+
+        if('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                .then(reg => console.log('Service Worker Registrado no Porto! 🍣', reg))
+                .catch(err => console.error('Erro ao preparar o sushi: ', err));
+            });
+        }
+
     </script>
 </body>
 </html>
