@@ -96,495 +96,185 @@
   </style>
 </head>
 
-<body class="min-h-screen relative overflow-x-hidden">
+<body class="font-barlow text-dark w-full m-0 min-h-screen flex flex-col">
 
-  <!-- ═══════════════ TOPBAR ═══════════════ -->
-  <header class="sticky top-0 z-50 bg-dark/95 backdrop-blur border-b border-brand/20 px-4 py-3 flex items-center justify-between">
-
-    <!-- Logo + status -->
-    <div class="flex items-center gap-3">
-      <img src="https://front-milkshakito.pages.dev/assets/images/logoshake.png"
-           alt="MilkShakito" class="h-9 w-auto" onerror="this.style.display='none'" />
-      <div>
-        <p class="font-display text-2xl text-cream leading-none tracking-wide">COZINHA</p>
-        <div class="flex items-center gap-1.5 mt-0.5">
-          <span class="w-2 h-2 rounded-full bg-emerald-400 dot-live"></span>
-          <span class="text-xs text-emerald-400 font-semibold">AO VIVO</span>
+    <!-- HEADER -->
+    <header class="bg-white shadow-md py-4 px-6 flex justify-between items-center sticky top-0 z-50">
+        <div class="flex items-center gap-4">
+            <!-- Tenta carregar o logo de pastas anteriores, se falhar tem o texto alternativo (alt) visível -->
+            <img src="./assets/images/logoshake.png" onerror="this.src='../img/logo.png'; this.onerror=null;"
+                alt="Haruy Sushi" class="h-12 w-auto">
+            <h1 class="text-2xl font-bold text-primary hidden md:block border-l-2 border-primary pl-4">Painel da Cozinha
+            </h1>
         </div>
-      </div>
-    </div>
-
-    <!-- Sound wave + counter -->
-    <div class="flex items-center gap-4">
-      <!-- active sound indicator -->
-      <div id="soundWave" class="hidden items-center h-6 gap-0">
-        <span class="bar h-2"></span><span class="bar h-4"></span>
-        <span class="bar h-6"></span><span class="bar h-3"></span>
-        <span class="bar h-5"></span>
-      </div>
-
-      <div class="text-right">
-        <p class="text-xs text-cream/50 font-semibold uppercase tracking-widest">Hoje</p>
-        <p class="font-display text-3xl text-brand leading-none" id="totalCount">0</p>
-      </div>
-
-      <!-- Notif toggle -->
-      <button id="soundBtn" onclick="toggleSound()"
-        class="w-9 h-9 rounded-full border border-brand/40 flex items-center justify-center text-lg hover:bg-brand/20 transition"
-        title="Ativar/desativar som">🔔</button>
-
-      <!-- Clock -->
-      <div class="bg-card rounded-lg px-3 py-1.5 border border-brand/20">
-        <p class="font-display text-xl text-cream tracking-widest" id="clock">--:--</p>
-      </div>
-    </div>
-  </header>
-
-  <!-- ═══════════════ KANBAN BOARD ═════════════ -->
-  <main class="relative z-10 p-4 grid grid-cols-1 md:grid-cols-3 gap-4 min-h-[calc(100vh-68px)]">
-
-    <!-- ── COL 1: Novos ─────────────────────── -->
-    <section class="flex flex-col gap-3">
-      <div class="col-header bg-brand rounded-xl px-4 py-3 flex items-center justify-between">
-        <div class="flex items-center gap-2">
-          <span class="text-2xl">🆕</span>
-          <span class="font-display text-xl text-white tracking-wider">NOVOS PEDIDOS</span>
+        <div class="flex items-center gap-4">
+            <div id="status-conexao" class="flex items-center gap-2 text-sm font-bold text-green-600">
+                <span class="w-3 h-3 bg-green-500 rounded-full animate-pulse"></span>
+                Online
+            </div>
+            <button onclick="carregarPedidos()"
+                class="bg-dark text-white px-4 py-2 rounded font-bold hover:bg-black transition">
+                Atualizar
+            </button>
         </div>
-        <span id="countNew" class="bg-white/20 text-white text-sm font-bold px-2.5 py-0.5 rounded-full">0</span>
-      </div>
-      <div id="colNew" class="col-body flex flex-col gap-3 flex-1 rounded-xl p-1 transition-all min-h-32"
-           ondragover="onDragOver(event)" ondrop="onDrop(event,'preparando')">
-        <!-- cards injected here -->
-      </div>
-    </section>
+    </header>
 
-    <!-- ── COL 2: Preparando ─────────────────── -->
-    <section class="flex flex-col gap-3">
-      <div class="col-header bg-amber-600 rounded-xl px-4 py-3 flex items-center justify-between">
-        <div class="flex items-center gap-2">
-          <span class="text-2xl">⏳</span>
-          <span class="font-display text-xl text-white tracking-wider">PREPARANDO</span>
+    <!-- MAIN CONTENT -->
+    <main class="flex-grow p-6">
+        <div class="max-w-7xl mx-auto">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-3xl font-black text-dark">Pedidos Recebidos</h2>
+                <span id="contador-pedidos" class="bg-primary text-white px-3 py-1 rounded-full font-bold text-sm">0
+                    pedidos</span>
+            </div>
+
+            <!-- GRID DE PEDIDOS -->
+            <div id="pedidos-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Pedidos serão injetados aqui via JavaScript -->
+                <p class="text-muted col-span-full text-center py-10">Carregando pedidos...</p>
+            </div>
         </div>
-        <span id="countPrep" class="bg-white/20 text-white text-sm font-bold px-2.5 py-0.5 rounded-full">0</span>
-      </div>
-      <div id="colPrep" class="col-body flex flex-col gap-3 flex-1 rounded-xl p-1 transition-all min-h-32"
-           ondragover="onDragOver(event)" ondrop="onDrop(event,'pronto')">
-      </div>
-    </section>
+    </main>
 
-    <!-- ── COL 3: Prontos ──────────────────── -->
-    <section class="flex flex-col gap-3">
-      <div class="col-header bg-emerald-700 rounded-xl px-4 py-3 flex items-center justify-between">
-        <div class="flex items-center gap-2">
-          <span class="text-2xl">✅</span>
-          <span class="font-display text-xl text-white tracking-wider">PRONTOS</span>
-        </div>
-        <span id="countReady" class="bg-white/20 text-white text-sm font-bold px-2.5 py-0.5 rounded-full">0</span>
-      </div>
-      <div id="colReady" class="col-body flex flex-col gap-3 flex-1 rounded-xl p-1 transition-all min-h-32"
-           ondragover="onDragOver(event)" ondrop="onDrop(event,'entregue')">
-      </div>
-    </section>
+    <!-- JAVASCRIPT: Lógica de Buscar e Exibir Pedidos -->
+    <script>
+        // URL do Backend onde a nova rota foi publicada (na Vercel)
+        const URL_API = 'https://backend-aula07-milkshakito-vercel-aoxn0xjbg-nkauvos-projects.vercel.app/api/pedidos';
 
-  </main>
+        // Função para buscar os pedidos na API
+        async function carregarPedidos() {
+            const container = document.getElementById('pedidos-container');
+            const contador = document.getElementById('contador-pedidos');
+            const statusConexao = document.getElementById('status-conexao');
 
-  <!-- ═══════════════ MODAL DETALHE ════════ -->
-  <div id="modal" class="fixed inset-0 z-[100] hidden items-center justify-center p-4">
-    <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" onclick="closeModal()"></div>
-    <div class="relative bg-card border border-brand/30 rounded-2xl w-full max-w-md shadow-2xl overflow-hidden">
-      <!-- header -->
-      <div class="bg-brand px-5 py-4 flex items-center justify-between">
-        <p class="font-display text-2xl text-white tracking-wider" id="modalTitle">Pedido #000</p>
-        <button onclick="closeModal()" class="text-white/70 hover:text-white text-2xl leading-none">×</button>
-      </div>
-      <!-- body -->
-      <div class="p-5 space-y-4">
-        <div>
-          <p class="text-xs uppercase text-cream/40 tracking-widest mb-1">Cliente</p>
-          <p class="font-bold text-cream text-lg" id="modalClient">—</p>
-        </div>
-        <div>
-          <p class="text-xs uppercase text-cream/40 tracking-widest mb-1">Itens</p>
-          <ul id="modalItems" class="space-y-1.5"></ul>
-        </div>
-        <div class="flex gap-3">
-          <div class="flex-1">
-            <p class="text-xs uppercase text-cream/40 tracking-widest mb-1">Total</p>
-            <p class="font-display text-2xl text-brand" id="modalTotal">R$ 0,00</p>
-          </div>
-          <div class="flex-1">
-            <p class="text-xs uppercase text-cream/40 tracking-widest mb-1">Pagamento</p>
-            <p class="font-bold text-cream" id="modalPay">—</p>
-          </div>
-        </div>
-        <div>
-          <p class="text-xs uppercase text-cream/40 tracking-widest mb-1">Obs.</p>
-          <p class="text-cream/70 text-sm italic" id="modalObs">Nenhuma observação</p>
-        </div>
-        <!-- action buttons -->
-        <div class="pt-2 flex gap-3">
-          <button id="modalActionBtn"
-            class="flex-1 bg-brand hover:bg-brandLt text-white font-bold py-3 rounded-xl transition text-sm uppercase tracking-wider"
-            onclick="modalAdvance()">Avançar →</button>
-          <button onclick="closeModal()"
-            class="px-5 bg-card border border-brand/30 hover:border-brand text-cream rounded-xl transition text-sm">
-            Fechar
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
+            try {
+                // Indicador visual de carregando (opcional, mas bom pra UX)
+                statusConexao.innerHTML = '<span class="w-3 h-3 bg-yellow-500 rounded-full animate-pulse"></span> Atualizando...';
+                statusConexao.className = 'flex items-center gap-2 text-sm font-bold text-yellow-600';
 
-  <!-- ═══════════════ TOAST ════════════════ -->
-  <div id="toast"
-    class="fixed bottom-6 left-1/2 -translate-x-1/2 z-[200] hidden bg-brand text-white font-bold text-sm px-5 py-3 rounded-full shadow-lg">
-  </div>
+                const resposta = await fetch(URL_API);
 
-  <!-- ═══════════════ AUDIO (invisible) ════ -->
-  <audio id="bellAudio" preload="auto">
-    <!-- beep via Web Audio API — no external file needed -->
-  </audio>
+                if (!resposta.ok) throw new Error('Erro ao buscar pedidos');
 
-  <!-- ═══════════════ SCRIPTS ══════════════ -->
-  <script>
-  /* ────────────────────────────────────────────
-     STATE
-  ──────────────────────────────────────────── */
-  const STATUS = { novo:'novo', preparando:'preparando', pronto:'pronto', entregue:'entregue' };
+                const pedidos = await resposta.json();
+                renderizarPedidos(pedidos);
 
-  let orders = [];          // all orders
-  let soundOn = true;
-  let draggingId = null;
-  let modalOrderId = null;
-  let orderSeq = 0;
-  let totalToday = 0;
+                // Atualiza contador
+                contador.innerText = `${pedidos.length} pedido(s)`;
 
-  // Web Audio context for beep
-  let audioCtx = null;
+                // Volta o status para online
+                setTimeout(() => {
+                    statusConexao.innerHTML = '<span class="w-3 h-3 bg-green-500 rounded-full animate-pulse"></span> Online';
+                    statusConexao.className = 'flex items-center gap-2 text-sm font-bold text-green-600';
+                }, 500);
 
-  /* ────────────────────────────────────────────
-     CLOCK
-  ──────────────────────────────────────────── */
-  function updateClock() {
-    const now = new Date();
-    document.getElementById('clock').textContent =
-      now.toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' });
-  }
-  updateClock();
-  setInterval(updateClock, 1000);
+            } catch (erro) {
+                console.error("Erro ao carregar pedidos:", erro);
+                container.innerHTML = `
+                    <div class="col-span-full bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+                      <strong class="font-bold">Ops!</strong>
+                      <span class="block sm:inline">Não foi possível carregar os pedidos da nuvem. Verifique a conexão com a API.</span>
+                    </div>`;
 
-  /* ────────────────────────────────────────────
-     TIMERS per card
-  ──────────────────────────────────────────── */
-  setInterval(() => {
-    orders.forEach(o => {
-      if (o.status === STATUS.entregue) return;
-      const el = document.getElementById('timer-' + o.id);
-      if (!el) return;
-      const mins = Math.floor((Date.now() - o.createdAt) / 60000);
-      el.textContent = mins + 'min';
-      if (mins >= 10) el.classList.add('timer-late');
-      else el.classList.remove('timer-late');
-    });
-  }, 15000);
+                statusConexao.innerHTML = '<span class="w-3 h-3 bg-red-500 rounded-full"></span> Offline';
+                statusConexao.className = 'flex items-center gap-2 text-sm font-bold text-red-600';
+            }
+        }
 
-  /* ────────────────────────────────────────────
-     SOUND
-  ──────────────────────────────────────────── */
-  function toggleSound() {
-    soundOn = !soundOn;
-    document.getElementById('soundBtn').textContent = soundOn ? '🔔' : '🔕';
-    showToast(soundOn ? 'Som ativado' : 'Som desativado');
-  }
+        // Função para desenhar os pedidos na tela
+        function renderizarPedidos(pedidos) {
+            const container = document.getElementById('pedidos-container');
+            container.innerHTML = '';
 
-  function playBeep() {
-    if (!soundOn) return;
-    try {
-      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      const osc = audioCtx.createOscillator();
-      const gain = audioCtx.createGain();
-      osc.connect(gain); gain.connect(audioCtx.destination);
-      osc.type = 'sine'; osc.frequency.value = 880;
-      gain.gain.setValueAtTime(0.4, audioCtx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + .4);
-      osc.start(); osc.stop(audioCtx.currentTime + .4);
-    } catch(e) {}
+            if (pedidos.length === 0) {
+                container.innerHTML = `
+                    <div class="col-span-full flex flex-col items-center justify-center py-16 opacity-50">
+                        <svg class="w-16 h-16 text-muted mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+                        <p class="text-xl font-bold text-dark">Nenhum pedido pendente.</p>
+                        <p class="text-muted">A cozinha está livre por enquanto!</p>
+                    </div>`;
+                return;
+            }
 
-    // show wave animation briefly
-    const w = document.getElementById('soundWave');
-    w.classList.remove('hidden');
-    w.classList.add('flex');
-    setTimeout(() => { w.classList.add('hidden'); w.classList.remove('flex'); }, 1500);
-  }
+            // Para cada pedido, cria um Card
+            pedidos.forEach(pedido => {
+                // Tenta transformar a coluna de itens em array caso tenha vindo como texto (JSON) do banco
+                let itens = [];
+                try {
+                    itens = typeof pedido.itens === 'string' ? JSON.parse(pedido.itens) : pedido.itens;
+                } catch (e) {
+                    console.error("Erro ao converter itens do pedido:", e);
+                }
 
-  /* ────────────────────────────────────────────
-     TOAST
-  ──────────────────────────────────────────── */
-  let toastTimer;
-  function showToast(msg) {
-    const t = document.getElementById('toast');
-    t.textContent = msg;
-    t.classList.remove('hidden');
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => t.classList.add('hidden'), 2500);
-  }
+                if (!itens || !Array.isArray(itens)) itens = [];
 
-  function render() {
-    const cols = {
-      novo:       document.getElementById('colNew'),
-      preparando: document.getElementById('colPrep'),
-      pronto:     document.getElementById('colReady'),
-    };
+                // Monta o HTML da lista de itens
+                let htmlItens = itens.map(item => `
+                    <li class="flex justify-between border-b border-gray-100 py-2">
+                        <span class="font-semibold text-dark">${item.quantidade || 1}x ${item.nome || 'Produto'}</span> 
+                        <span class="text-muted">R$ ${(item.preco || 0).toFixed(2)}</span>
+                    </li>
+                `).join('');
 
-    // clear columns
-    Object.values(cols).forEach(c => c.innerHTML = '');
+                // Formata a data (se existir)
+                let dataFormatada = 'Data desconhecida';
+                if (pedido.created_at) {
+                    const dataObj = new Date(pedido.created_at);
+                    dataFormatada = dataObj.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) + ' - ' + dataObj.toLocaleDateString('pt-BR');
+                }
 
-    // counters
-    let cNew=0, cPrep=0, cReady=0;
+                // Cria o Card do HTML
+                const card = `
+                    <div class="bg-white border-t-4 border-primary shadow-lg rounded-xl p-5 flex flex-col hover:shadow-xl transition duration-300">
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <h2 class="text-xl font-black text-dark">Pedido #${pedido.id}</h2>
+                                <span class="text-xs text-muted">${dataFormatada}</span>
+                            </div>
+                            <span class="bg-yellow-100 text-yellow-800 text-xs font-black uppercase px-2 py-1 rounded">
+                                ${pedido.status || 'Pendente'}
+                            </span>
+                        </div>
+                        
+                        <div class="mb-4 bg-gray-50 p-3 rounded-lg text-sm">
+                            <p class="mb-1"><strong>Cliente:</strong> <span class="text-gray-700">${pedido.cliente_nome || 'Não informado'}</span></p>
+                            <p><strong>Endereço:</strong> <span class="text-gray-700">${pedido.cliente_endereco || 'Não informado'}</span></p>
+                        </div>
+                        
+                        <div class="flex-grow mb-4">
+                            <h3 class="font-bold text-dark mb-2 uppercase text-sm">Itens do Pedido:</h3>
+                            <ul class="text-sm">
+                                ${htmlItens}
+                            </ul>
+                        </div>
+                        
+                        <div class="mt-auto pt-4 border-t border-gray-200 flex justify-between items-center">
+                            <div class="flex flex-col">
+                                <span class="text-xs text-muted font-bold uppercase">Total a pagar</span>
+                                <span class="font-black text-xl text-primary">R$ ${(pedido.total || 0).toFixed(2)}</span>
+                            </div>
+                            <button onclick="concluirPedido(this)" class="bg-green-600 text-white px-5 py-2 rounded-lg font-bold hover:bg-green-700 transition transform hover:scale-105">
+                                Pronto ✓
+                            </button>
+                        </div>
+                    </div>
+                `;
+                container.innerHTML += card;
+            });
+        }
 
-    orders.forEach(order => {
-      if (order.status === STATUS.entregue) return; // hide delivered
+        // Função simulação para o botão de concluir
+        function concluirPedido(btn) {
+            const card = btn.closest('.bg-white');
+            card.classList.add('opacity-50', 'grayscale', 'pointer-events-none');
+            btn.innerText = 'Finalizado';
+            btn.classList.replace('bg-green-600', 'bg-gray-400');
+            btn.classList.replace('hover:bg-green-700', 'hover:bg-gray-400');
+        }
 
-      const mins = Math.floor((Date.now() - order.createdAt) / 60000);
-      const isLate = mins >= 10;
-
-      const card = document.createElement('div');
-      card.className = 'order-card bg-card border border-brand/20 rounded-xl p-4 cursor-pointer hover:border-brand/50 transition select-none';
-      card.setAttribute('draggable', 'true');
-      card.dataset.id = order.id;
-      card.addEventListener('dragstart', () => { draggingId = order.id; card.classList.add('opacity-50'); });
-      card.addEventListener('dragend',   () => { draggingId = null;    card.classList.remove('opacity-50'); });
-      card.addEventListener('click', () => openModal(order.id));
-
-      // status badge colors
-      const badgeColor = {
-        novo: 'bg-brand badge-new',
-        preparando: 'bg-amber-600',
-        pronto: 'bg-emerald-600',
-      }[order.status] || 'bg-brand';
-
-      card.innerHTML = `
-        <div class="flex items-start justify-between mb-3">
-          <div>
-            <span class="${badgeColor} text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
-              #${String(order.seq).padStart(3,'0')}
-            </span>
-            <p class="font-bold text-cream mt-1 text-sm">${escHtml(order.client)}</p>
-          </div>
-          <div class="text-right">
-            <p class="font-display text-lg text-brand leading-none">${fmtBRL(order.total)}</p>
-            <p id="timer-${order.id}" class="text-xs mt-0.5 font-semibold ${isLate ? 'timer-late' : 'text-cream/40'}">${mins}min</p>
-          </div>
-        </div>
-
-        <!-- items summary -->
-        <ul class="space-y-1 mb-3">
-          ${order.items.slice(0,3).map(it => `
-            <li class="flex items-center gap-2 text-sm">
-              <span class="w-5 h-5 rounded-full bg-brand/20 text-brand font-bold text-xs flex items-center justify-center flex-shrink-0">${it.qty}</span>
-              <span class="text-cream/80 truncate">${escHtml(it.name)}</span>
-            </li>
-          `).join('')}
-          ${order.items.length > 3 ? `<li class="text-xs text-cream/30 pl-7">+${order.items.length-3} item(s)</li>` : ''}
-        </ul>
-
-        <!-- footer -->
-        <div class="flex items-center justify-between border-t border-brand/10 pt-2">
-          <span class="text-xs text-cream/40">${order.payMethod}</span>
-          <div class="flex gap-2">
-            ${order.status !== STATUS.pronto ? `
-              <button class="btn-advance text-xs bg-brand/20 hover:bg-brand text-brand hover:text-white font-bold px-3 py-1 rounded-lg transition"
-                onclick="advanceOrder(event,'${order.id}')">
-                ${order.status === STATUS.novo ? 'Preparar →' : 'Pronto ✓'}
-              </button>` : `
-              <button class="text-xs bg-emerald-700/40 hover:bg-emerald-600 text-emerald-300 hover:text-white font-bold px-3 py-1 rounded-lg transition"
-                onclick="advanceOrder(event,'${order.id}')">
-                Entregar 🛵
-              </button>`}
-          </div>
-        </div>
-      `;
-
-      cols[order.status].appendChild(card);
-
-      if (order.status === STATUS.novo)        cNew++;
-      else if (order.status === STATUS.preparando) cPrep++;
-      else if (order.status === STATUS.pronto)     cReady++;
-    });
-
-    document.getElementById('countNew').textContent   = cNew;
-    document.getElementById('countPrep').textContent  = cPrep;
-    document.getElementById('countReady').textContent = cReady;
-    document.getElementById('totalCount').textContent = totalToday;
-  }
-
-  const nextStatus = {
-    novo: STATUS.preparando,
-    preparando: STATUS.pronto,
-    pronto: STATUS.entregue,
-  };
-
-  const statusLabel = {
-    preparando: 'Em preparação!',
-    pronto: 'Pronto para entrega!',
-    entregue: 'Pedido entregue!',
-  };
-
-  function advanceOrder(evt, id) {
-    evt && evt.stopPropagation();
-    const o = orders.find(x => x.id === id);
-    if (!o) return;
-    o.status = nextStatus[o.status] || o.status;
-    showToast(statusLabel[o.status] || '');
-    closeModal();
-    render();
-  }
-
-  function onDragOver(evt) {
-    evt.preventDefault();
-    evt.currentTarget.classList.add('drag-over');
-  }
-  document.addEventListener('dragleave', e => {
-    if (e.target.classList.contains('col-body'))
-      e.target.classList.remove('drag-over');
-  });
-
-  function onDrop(evt, toStatus) {
-    evt.preventDefault();
-    evt.currentTarget.classList.remove('drag-over');
-    if (!draggingId) return;
-    const o = orders.find(x => x.id === draggingId);
-    if (o) { o.status = toStatus; render(); showToast('Pedido movido!'); }
-  }
-
-  function openModal(id) {
-    const o = orders.find(x => x.id === id);
-    if (!o) return;
-    modalOrderId = id;
-    document.getElementById('modalTitle').textContent  = `Pedido #${String(o.seq).padStart(3,'0')}`;
-    document.getElementById('modalClient').textContent = o.client;
-    document.getElementById('modalTotal').textContent  = fmtBRL(o.total);
-    document.getElementById('modalPay').textContent    = o.payMethod;
-    document.getElementById('modalObs').textContent    = o.obs || 'Nenhuma observação';
-
-    const ul = document.getElementById('modalItems');
-    ul.innerHTML = o.items.map(it => `
-      <li class="flex items-center justify-between bg-dark/60 rounded-lg px-3 py-2">
-        <div class="flex items-center gap-2">
-          <span class="w-6 h-6 rounded-full bg-brand text-white text-xs font-bold flex items-center justify-center">${it.qty}</span>
-          <span class="text-cream text-sm">${escHtml(it.name)}</span>
-        </div>
-        <span class="text-cream/60 text-sm font-semibold">${fmtBRL(it.price * it.qty)}</span>
-      </li>
-    `).join('');
-
-    const btn = document.getElementById('modalActionBtn');
-    if (o.status === STATUS.entregue) {
-      btn.style.display = 'none';
-    } else {
-      btn.style.display = '';
-      btn.textContent = {
-        novo: 'Iniciar preparo →',
-        preparando: 'Marcar como pronto ✓',
-        pronto: 'Marcar como entregue 🛵',
-      }[o.status] || 'Avançar';
-    }
-
-    const m = document.getElementById('modal');
-    m.classList.remove('hidden');
-    m.classList.add('flex');
-  }
-
-  function closeModal() {
-    const m = document.getElementById('modal');
-    m.classList.add('hidden');
-    m.classList.remove('flex');
-    modalOrderId = null;
-  }
-
-  function modalAdvance() {
-    if (modalOrderId) advanceOrder(null, modalOrderId);
-  }
-
-  function addOrder(data) {
-    orderSeq++;
-    totalToday++;
-    const id = 'ord-' + Date.now() + '-' + Math.random().toString(36).slice(2,6);
-    orders.unshift({
-      id,
-      seq: orderSeq,
-      client:    data.client    || 'Cliente',
-      items:     data.items     || [],
-      total:     data.total     || 0,
-      payMethod: data.payMethod || 'Dinheiro',
-      obs:       data.obs       || '',
-      status:    STATUS.novo,
-      createdAt: Date.now(),
-    });
-    playBeep();
-    render();
-    showToast(`🆕 Novo pedido de ${data.client}!`);
-  }
-
-  function fmtBRL(v) {
-    return 'R$ ' + Number(v).toFixed(2).replace('.',',');
-  }
-  function escHtml(s) {
-    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-  }
-
-  const SHAKES = [
-    { name:'Shake Morango', price:22 },
-    { name:'Shake Chocolate', price:24 },
-    { name:'Shake Baunilha', price:20 },
-    { name:'Shake Ovomaltine', price:26 },
-    { name:'Shake Ninho', price:25 },
-    { name:'Shake Red Velvet', price:28 },
-    { name:'Shake Nutella', price:30 },
-    { name:'Shake Oreo', price:27 },
-  ];
-  const NAMES = ['João Silva','Maria Oliveira','Carlos Ferreira','Ana Paula','Lucas Mendes','Fernanda Costa','Rafael Lima','Juliana Souza'];
-  const PAYS  = ['Dinheiro','PIX','Cartão Crédito','Cartão Débito'];
-
-  function demoOrder() {
-    const count = Math.floor(Math.random()*3)+1;
-    const items = [];
-    let total = 0;
-    for (let i=0;i<count;i++) {
-      const s = SHAKES[Math.floor(Math.random()*SHAKES.length)];
-      const qty = Math.floor(Math.random()*2)+1;
-      items.push({ name:s.name, price:s.price, qty });
-      total += s.price * qty;
-    }
-    addOrder({
-      client:    NAMES[Math.floor(Math.random()*NAMES.length)],
-      items,
-      total,
-      payMethod: PAYS[Math.floor(Math.random()*PAYS.length)],
-      obs:       Math.random() > .6 ? 'Sem açúcar / sem canudo' : '',
-    });
-  }
-
-  // seed 3 demo orders on load
-  demoOrder(); demoOrder(); demoOrder();
-
-  // simulate new order every 25–50s
-  setInterval(() => {
-    if (Math.random() > .3) demoOrder();
-  }, 28000);
-
-  document.addEventListener('keydown', e => {
-    if (e.key === 'n' || e.key === 'N') demoOrder();
-    if (e.key === 'Escape') closeModal();
-  });
-
-  
-  render();
-
-     //PUBLIC API (for backend integration)
-     //Use: window.MilkshakitoKitchen.newOrder(data)
-
-  window.MilkshakitoKitchen = { newOrder: addOrder };
-  </script>
+        // Inicia carregando os pedidos e configura atualização automática a cada 10 segundos
+        carregarPedidos();
+        setInterval(carregarPedidos, 10000);
+    </script>
 </body>
 </html>
