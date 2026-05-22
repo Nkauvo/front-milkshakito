@@ -211,7 +211,7 @@
                 // Monta o HTML da lista de itens
                 let htmlItens = itens.map(item => `
                     <li class="flex justify-between border-b border-gray-100 py-2">
-                        <span class="font-semibold text-dark">${item.quantidade || 1}x ${item.nome || 'Produto'}</span> 
+                       <span class="font-semibold text-dark">${item.qtd || item.quantidade || 1}x ${item.nome || 'Produto'}</span>
                         <span class="text-muted">R$ ${(item.preco || 0).toFixed(2)}</span>
                     </li>
                 `).join('');

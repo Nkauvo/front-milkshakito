@@ -294,11 +294,19 @@
                 <span id="cart-total-value" class="text-principal">R$ 0,00</span>
             </div>
 
+        <input type="text" id="cliente-nome" placeholder="Seu Nome Completo" class="w-full mb-3 p-3 border border-gray-300 rounded-lg outline-none focus:border-primary">
+        <input type="text" id="cliente-endereco" placeholder="Endereço de Entrega (Rua, Número, Bairro)" class="w-full mb-4 p-3 border border-gray-300 rounded-lg outline-none focus:border-primary">
             <!-- Campo para o usuário informar o nome antes de finalizar -->
-            <div class="space-y-4 mb-6">
+            <!-- <div class="space-y-4 mb-6">
                 <input type="text" id="user-name" placeholder="Informe seu nome"
                     class="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl outline-none focus:border-principal transition-all">
-            </div>
+            </div> -->
+
+            <!-- campo para o usuario colocar o endereço -->
+            <!-- <div class="space-y-4 mb-6">
+                <input type="text" id="user-address" placeholder="Informe seu endereço"
+                    class="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl outline-none focus:border-principal transition-all">
+            </div> -->
 
             <div class="flex gap-4">
                 <button id="close-cart" class="flex-1 py-4 bg-gray-100 text-gray-600 rounded-2xl font-bold hover:bg-gray-200 transition-all">Voltar</button>
@@ -646,12 +654,7 @@
         // Inicia o carregamento do cardápio via API ao carregar a página
         // carregarCardapio();
 
-        // ADICIONADO: abrirModalCarrinho() e fecharModalCarrinho()
-        //
-        // CORREÇÃO: O modal do carrinho usava só "hidden" para
-        // esconder. Mas para ele aparecer centralizado na tela
-        // é preciso de "flex". O JS agora alterna entre as duas
-        // classes corretamente ao abrir e fechar.
+        
         function abrirModalCarrinho() {
             cartModal.classList.remove('hidden'); // remove o que esconde
             cartModal.classList.add('flex');      // adiciona flex para centralizar
@@ -685,16 +688,29 @@
         // 2. Tenta pegar a localização GPS do usuário
         // 3. Exibe confirmação com nome e coordenadas
         // 4. Limpa o carrinho e fecha o modal
+        // GPS E FINALIZAÇÃO DO PEDIDO
         const checkoutBtn = document.getElementById('checkout-btn');
         checkoutBtn.addEventListener('click', () => {
-            const nome = document.getElementById('user-name').value;
-            if (!nome) return alert("Informe seu nome para continuar!");
-            if (carrinho.length === 0) return alert("Seu carrinho está vazio!");
+            
+            // 1. Pega os elementos e valores dos inputs CORRETOS que estão ativos no seu HTML
+            const nomeInput = document.getElementById('cliente-nome');
+            const enderecoInput = document.getElementById('cliente-endereco');
+            const nome = nomeInput.value.trim();
+            const endereco = enderecoInput.value.trim();
+
+            // 2. Validações fundamentais
+            if (carrinho.length === 0) {
+                return alert("Seu carrinho está vazio!");
+            }
+            if (!nome || !endereco) {
+                return alert("Por favor, informe seu nome e endereço para finalizar o pedido.");
+            }
 
             const originalText = checkoutBtn.innerText;
             checkoutBtn.disabled = true;
             checkoutBtn.innerText = "Buscando GPS...";
 
+            // 3. Lógica do GPS
             if ("geolocation" in navigator) {
                 navigator.geolocation.getCurrentPosition(
                     // Sucesso: GPS encontrou a localização
@@ -704,33 +720,35 @@
                         checkoutBtn.disabled = false;
                         checkoutBtn.innerText = originalText;
 
-                        alert(`✅ PEDIDO CONCLUÍDO!\n\nCliente: ${nome}\nLocalização: ${lat.toFixed(5)}, ${lon.toFixed(5)}\n\nObrigado por pedir no MilkShakito! Seu carrinho foi limpo.`);
+                        alert(`✅ PEDIDO CONCLUÍDO!\n\nCliente: ${nome}\nEndereço: ${endereco}\nLocalização: ${lat.toFixed(5)}, ${lon.toFixed(5)}\n\nObrigado por pedir no MilkShakito!`);
 
-                        carrinho = [];
-                        atualizarCarrinhoUI();
-                        fecharModalCarrinho();
-                        document.getElementById('user-name').value = '';
+                        finalizarComSucesso();
                     },
-                    // Erro: GPS não disponível ou bloqueado pelo usuário
+                    // Erro: GPS desativado ou bloqueado
                     (err) => {
                         checkoutBtn.disabled = false;
                         checkoutBtn.innerText = originalText;
-                        alert(`Pedido confirmado, ${nome}! (GPS não disponível, mas anotamos seu pedido)`);
-                        carrinho = [];
-                        atualizarCarrinhoUI();
-                        fecharModalCarrinho();
+                        alert(`Pedido confirmado, ${nome}! (GPS não disponível, mas anotamos seu endereço: ${endereco})`);
+                        
+                        finalizarComSucesso();
                     },
                     { enableHighAccuracy: true, timeout: 5000 }
                 );
             } else {
                 // Navegador não suporta geolocalização
-                alert(`Pedido finalizado, ${nome}!`);
+                alert(`Pedido finalizado, ${nome}!\nEntregaremos em: ${endereco}`);
+                finalizarComSucesso();
+            }
+
+            // Função auxiliar para limpar os campos e o carrinho após o sucesso
+            function finalizarComSucesso() {
                 carrinho = [];
                 atualizarCarrinhoUI();
                 fecharModalCarrinho();
+                nomeInput.value = '';
+                enderecoInput.value = '';
             }
         });
-
         // Chamada inicial ao carregar a página:
         // 1. Restaura o carrinho salvo no localStorage
         // 2. Busca o cardápio na API (com imagens do Supabase)
