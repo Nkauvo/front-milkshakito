@@ -682,15 +682,9 @@
             if (e.target === cartModal) fecharModalCarrinho();
         });
 
-        // GPS E FINALIZAÇÃO DO PEDIDO
-        // Ao clicar em "Concluir Pedido":
-        // 1. Valida o nome e se há itens no carrinho
-        // 2. Tenta pegar a localização GPS do usuário
-        // 3. Exibe confirmação com nome e coordenadas
-        // 4. Limpa o carrinho e fecha o modal
-        // GPS E FINALIZAÇÃO DO PEDIDO
+        // INTEGRAÇÃO API - FINALIZAÇÃO DO PEDIDO
         const checkoutBtn = document.getElementById('checkout-btn');
-        checkoutBtn.addEventListener('click', () => {
+        checkoutBtn.addEventListener('click', async () => {
             
             // 1. Pega os elementos e valores dos inputs CORRETOS que estão ativos no seu HTML
             const nomeInput = document.getElementById('cliente-nome');
@@ -708,36 +702,52 @@
 
             const originalText = checkoutBtn.innerText;
             checkoutBtn.disabled = true;
-            checkoutBtn.innerText = "Buscando GPS...";
+            checkoutBtn.innerText = "Enviando Pedido...";
+            checkoutBtn.classList.add("opacity-50");
 
-            // 3. Lógica do GPS
-            if ("geolocation" in navigator) {
-                navigator.geolocation.getCurrentPosition(
-                    // Sucesso: GPS encontrou a localização
-                    (pos) => {
-                        const lat = pos.coords.latitude;
-                        const lon = pos.coords.longitude;
-                        checkoutBtn.disabled = false;
-                        checkoutBtn.innerText = originalText;
+            // Calcula o total do pedido usando 'item.qtd' (que é como o Gabriel nomeou)
+            const total = carrinho.reduce((acc, item) => acc + (item.preco * item.qtd), 0);
 
-                        alert(`✅ PEDIDO CONCLUÍDO!\n\nCliente: ${nome}\nEndereço: ${endereco}\nLocalização: ${lat.toFixed(5)}, ${lon.toFixed(5)}\n\nObrigado por pedir no MilkShakito!`);
+            // Mapeia o carrinho para o padrão que a API/Cozinha espera (quantidade em vez de qtd)
+            const itensFormatados = carrinho.map(item => ({
+                nome: item.nome,
+                preco: item.preco,
+                quantidade: item.qtd
+            }));
 
-                        finalizarComSucesso();
+            // Monta o pacote de dados EXATAMENTE como a API e o banco de dados esperam!
+            const payloadPedido = {
+                cliente_nome: nome,
+                cliente_endereco: endereco,
+                itens: itensFormatados,
+                total: total
+            };
+
+            try {
+                // Envia (POST) os dados para a API (Vercel)
+                const resposta = await fetch(`${API_URL}/pedidos`, {
+                    method: 'POST', // Tipo de envio
+                    headers: {
+                        'Content-Type': 'application/json' // Avisa que estamos mandando JSON
                     },
-                    // Erro: GPS desativado ou bloqueado
-                    (err) => {
-                        checkoutBtn.disabled = false;
-                        checkoutBtn.innerText = originalText;
-                        alert(`Pedido confirmado, ${nome}! (GPS não disponível, mas anotamos seu endereço: ${endereco})`);
-                        
-                        finalizarComSucesso();
-                    },
-                    { enableHighAccuracy: true, timeout: 5000 }
-                );
-            } else {
-                // Navegador não suporta geolocalização
-                alert(`Pedido finalizado, ${nome}!\nEntregaremos em: ${endereco}`);
+                    body: JSON.stringify(payloadPedido) // Transforma o objeto em texto JSON
+                });
+
+                if (!resposta.ok) throw new Error('Erro ao enviar pedido');
+
+                alert(`✅ PEDIDO CONCLUÍDO!\n\nCliente: ${nome}\nEndereço: ${endereco}\n\nO pedido já foi enviado para a cozinha! Obrigado por pedir no MilkShakito!`);
+                
+                // Se deu tudo certo, limpamos os campos e o carrinho
                 finalizarComSucesso();
+
+            } catch (erro) {
+                console.error(erro);
+                alert("Ops! Ocorreu um problema de conexão. Tente novamente.");
+            } finally {
+                // Volta o botão ao normal indepente se deu erro ou sucesso
+                checkoutBtn.innerText = originalText;
+                checkoutBtn.disabled = false;
+                checkoutBtn.classList.remove("opacity-50");
             }
 
             // Função auxiliar para limpar os campos e o carrinho após o sucesso
