@@ -1,4 +1,4 @@
-const CACHE_NAME = 'milkshakito-cache-v8';
+const CACHE_NAME = 'milkshakito-cache-v9';
 const ASSETS = [
     './',
     './index.html',
@@ -20,6 +20,11 @@ self.addEventListener('install', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
+    // Ignorar requisições POST, PUT, DELETE, etc.
+    if (event.request.method !== 'GET') {
+        return;
+    }
+    
     event.respondWith(
         caches.match(event.request).then((response) => {
             return response || fetch(event.request);
