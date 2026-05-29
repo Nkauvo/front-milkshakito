@@ -386,7 +386,6 @@
                 const resposta = await fetch(URL_PEDIDOS);
 
                 if (!resposta.ok) throw new Error('Erro ao buscar pedidos');
-
                 const pedidos = await resposta.json();
                 renderizarPedidos(pedidos);
 
@@ -668,7 +667,7 @@
                 const imgSource = (p.imagem && p.imagem.startsWith('http')) ? p.imagem : `./img/${p.imagem || 'logo.png'}`;
                 
                 // Mapeamento de nome de categoria
-                const categoriaObj = categoriasData.find(cat => cat.id == p.categoriaId);
+                const categoriaObj = categoriasData.find(cat => cat.id == p.categoria_id);
                 const categoriaNome = categoriaObj ? categoriaObj.nome : 'Sem Categoria';
 
                 const card = `
@@ -728,7 +727,7 @@
                 if (prod) {
                     document.getElementById('prod-id').value = prod.id;
                     document.getElementById('prod-nome').value = prod.nome;
-                    document.getElementById('prod-categoria').value = prod.categoriaId;
+                    document.getElementById('prod-categoria').value = prod.categoria_id;
                     document.getElementById('prod-preco').value = prod.preco;
                     document.getElementById('prod-desc').value = prod.descricao || '';
                     document.getElementById('prod-imagem').value = prod.imagem || '';
@@ -756,19 +755,19 @@
 
             const id = document.getElementById('prod-id').value;
             const nome = document.getElementById('prod-nome').value;
-            const categoriaId = parseInt(document.getElementById('prod-categoria').value);
+            const categoria_id = parseInt(document.getElementById('prod-categoria').value);
             const preco = parseFloat(document.getElementById('prod-preco').value);
             const imagem = document.getElementById('prod-imagem').value || 'logo.png';
             const descricao = document.getElementById('prod-desc').value;
 
-            if (!nome || !categoriaId || isNaN(preco)) {
+            if (!nome || !categoria_id || isNaN(preco)) {
                 alert("Por favor, preencha todos os campos obrigatórios (*)");
                 return;
             }
 
             const payload = {
                 nome,
-                categoriaId,
+                categoria_id,
                 preco,
                 imagem,
                 descricao
