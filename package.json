@@ -1,29 +1,19 @@
-{
-<<<<<<< HEAD
-  "name": "front-milkshakito-main",
-  "version": "1.0.0",
-=======
+﻿{
   "name": "front-milkshakito",
   "version": "1.0.0",
-  "description": "",
->>>>>>> a759b02dcef8fddaa219e93f0d8fa7c856c1cd22
+  "description": "Milkshakito App",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "",
-<<<<<<< HEAD
   "license": "ISC",
-  "description": "",
-  "devDependencies": {
-    "@capacitor/cli": "^8.5.0",
+  "dependencies": {
+    "@capacitor/android": "^8.5.0",
     "@capacitor/core": "^8.5.0"
   },
-  "dependencies": {
-    "@capacitor/android": "^8.5.0"
+  "devDependencies": {
+    "@capacitor/cli": "^8.5.0"
   }
-=======
-  "license": "ISC"
->>>>>>> a759b02dcef8fddaa219e93f0d8fa7c856c1cd22
 }

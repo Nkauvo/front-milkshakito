@@ -1,1 +1,3 @@
-# test-front-milkshakito
+﻿# Milkshakito
+
+Aplicativo Milkshakito construído com Capacitor.
